@@ -34,7 +34,7 @@ cat <<EOF > "$OUT_FILE"
 
 # This formula was auto-generated for cidr-calculator (https://github.com/smford/cidr-calculator).
 class CidrCalculator < Formula
-  desc "High-performance CLI and library for IP range to CIDR conversion and subnet intelligence"
+  desc "Convert IP ranges into minimal CIDR blocks with subnet intelligence"
   homepage "https://github.com/smford/cidr-calculator"
   version "${VERSION}"
   license "MIT"
