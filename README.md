@@ -2,9 +2,12 @@
 
 [![CI](https://github.com/smford/cidr-calculator/actions/workflows/ci.yml/badge.svg)](https://github.com/smford/cidr-calculator/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/smford/cidr-calculator)](https://goreportcard.com/report/github.com/smford/cidr-calculator)
+[![GitHub Pages](https://img.shields.io/badge/Web_Playground-Live-brightgreen)](https://smford.github.io/cidr-calculator/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 A high-performance, zero-dependency Go terminal tool and library designed for Site Reliability Engineers, cloud architects, network engineers, and systems developers. `cidr-calculator` converts arbitrary IPv4 and IPv6 address ranges into minimal Classless Inter-Domain Routing (CIDR) blocks, aggregates subnets, detects collisions and containment, carves out exclusions, plans subnet allocations, and formats directly for Terraform, AWS, and CSV.
+
+Try the interactive web playground and documentation at **[smford.github.io/cidr-calculator](https://smford.github.io/cidr-calculator/)**.
 
 ---
 

@@ -2,8 +2,18 @@ name: Release
 
 on:
   push:
+    branches:
+      - main
     tags:
       - "v*"
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'LICENSE'
+      - 'Formula/**'
+      - '.github/workflows/pages.yml'
+      - '.gitignore'
+      - 'scripts/update-docs-version.sh'
   workflow_dispatch:
     inputs:
       bump:
@@ -47,6 +57,10 @@ jobs:
     name: Create GitHub Release & Homebrew Formula
     needs: [test]
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      version: ${{ steps.version.outputs.version }}
+      skip: ${{ steps.version.outputs.skip }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -90,6 +104,20 @@ jobs:
           LATEST_TAG=$(git tag -l "v*" | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$" | sort -V | tail -n 1)
           echo "Latest existing tag: ${LATEST_TAG:-none}"
 
+          # 4. Verify that codebase files changed since the previous tag
+          # Releases of the app should only happen when code changes, not on readme or website changes
+          MANUAL_BUMP="${{ inputs.bump }}"
+          if [ -n "$LATEST_TAG" ] && [ -z "$MANUAL_BUMP" -o "$MANUAL_BUMP" = "auto" ]; then
+            CHANGED_CODE=$(git diff --name-only "${LATEST_TAG}..HEAD" -- ':(exclude)docs' ':(exclude)*.md' ':(exclude)LICENSE' ':(exclude)Formula' ':(exclude).github/workflows/pages.yml' ':(exclude).gitignore' ':(exclude)scripts/update-docs-version.sh')
+            if [ -z "$CHANGED_CODE" ]; then
+              echo "No codebase changes detected since $LATEST_TAG. Skipping release."
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Codebase changes detected since $LATEST_TAG:"
+            echo "$CHANGED_CODE"
+          fi
+
           if [ -z "$LATEST_TAG" ]; then
             NEW_VERSION="1.0.0"
           else
@@ -98,7 +126,6 @@ jobs:
             MINOR=$(echo "$VERSION" | cut -d. -f2)
             PATCH=$(echo "$VERSION" | cut -d. -f3)
 
-            MANUAL_BUMP="${{ inputs.bump }}"
             BUMP="patch"
             if [ -n "$MANUAL_BUMP" ] && [ "$MANUAL_BUMP" != "auto" ]; then
               BUMP="$MANUAL_BUMP"
@@ -185,3 +212,15 @@ jobs:
           else
             echo "::warning ::HOMEBREW_TAP_TOKEN secret is not set. Skipped pushing to smford/homebrew-tap."
           fi
+
+  deploy-pages:
+    name: Deploy GitHub Pages
+    needs: release
+    if: needs.release.outputs.skip != 'true' && !cancelled() && needs.release.result == 'success'
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml
+    with:
+      version: ${{ needs.release.outputs.tag }}
