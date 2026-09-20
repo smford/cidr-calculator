@@ -1,0 +1,21 @@
+# Binaries
+cidr-calculator
+cidr-calculator-*
+bin/
+dist/
+
+# Test artifacts
+coverage.out
+coverage.html
+*.test
+
+# OS artifacts
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*~
