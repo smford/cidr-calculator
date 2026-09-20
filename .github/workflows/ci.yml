@@ -38,8 +38,13 @@ jobs:
       - name: Go vet
         run: go vet ./...
 
-      - name: Run tests with race detector
+      - name: Run tests with race detector (Linux & macOS)
+        if: runner.os != 'Windows'
         run: go test -v -race -coverprofile=coverage.out ./...
+
+      - name: Run tests (Windows)
+        if: runner.os == 'Windows'
+        run: go test -v ./...
 
   build-cross:
     name: Cross-Platform Build (${{ matrix.target.goos }}/${{ matrix.target.goarch }})
