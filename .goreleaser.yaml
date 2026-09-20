@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 version: 2
 
 project_name: cidr-calculator
@@ -23,19 +24,19 @@ builds:
       - -trimpath
     ldflags:
       - -s -w
-      - -X github.com/smford/cidr-calculator/internal/cli.Version={{.Version}}
-      - -X github.com/smford/cidr-calculator/internal/cli.Commit={{.Commit}}
-      - -X github.com/smford/cidr-calculator/internal/cli.BuildDate={{.Date}}
+      - -X github.com/smford/cidr-calculator/internal/cli.Version={{ .Version }}
+      - -X github.com/smford/cidr-calculator/internal/cli.Commit={{ .Commit }}
+      - -X github.com/smford/cidr-calculator/internal/cli.BuildDate={{ .Date }}
 
 archives:
-  - id: default
-    builds:
-      - cidr-calculator
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    format: tar.gz
+  - id: cidr-calculator
+    name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    formats:
+      - tar.gz
     format_overrides:
       - goos: windows
-        format: zip
+        formats:
+          - zip
     files:
       - LICENSE
       - README.md
@@ -52,24 +53,5 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+      - "^chore:"
       - "^Merge branch"
-
-brews:
-  - name: cidr-calculator
-    repository:
-      owner: smford
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    commit_author:
-      name: goreleaserbot
-      email: bot@goreleaser.com
-    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
-    homepage: "https://github.com/smford/cidr-calculator"
-    description: "High-performance CLI and library for IP range to CIDR conversion and subnet intelligence"
-    license: "MIT"
-    install: |
-      bin.install "cidr-calculator"
-      generate_completions_from_executable(bin/"cidr-calculator", "completion")
-    test: |
-      assert_match "192.168.1.10/31", shell_output("#{bin}/cidr-calculator 192.168.1.10+1")
-
